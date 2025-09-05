@@ -1,869 +1,555 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Chyper Engine // BETA</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.35/Tone.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <meta charset="utf-8" />
+  <title>Chyper Engine // Iron Signal Works</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            color: #aaff00;
-            font-family: 'Courier New', monospace;
-            overflow: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-image 0.3s, filter 0.3s, background-color 0.3s;
-        }
+  <!-- SEO -->
+  <meta name="description" content="Chyper Engine — encode/decode text with chaos layers, QR output, and sonic echoes. Built in the Iron Signal Works lab." />
+  <link rel="canonical" href="https://ironsignalworks.com/chyper" />
 
-        .panel {
-            width: 90%;
-            max-width: 720px;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 1rem;
-            border-radius: 6px;
-            box-shadow: 0 0 10px #aaff00;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            backdrop-filter: blur(4px) brightness(0.3);
-            box-sizing: border-box;
-            max-height: 95vh;
-            overflow-y: auto;
-            position: relative; /* For watermark positioning */
-        }
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="Chyper Engine // Iron Signal Works" />
+  <meta property="og:description" content="Encode/decode, glitch, QR, and sonic echoes — a compact cipher playground." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ironsignalworks.com/chyper" />
+  <meta property="og:image" content="https://ironsignalworks.com/og-chyper.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-        /* Watermark Style */
-        .watermark {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            opacity: 0.2; /* Adjust transparency as needed */
-            pointer-events: none; /* Make it non-interactive */
-            z-index: 10; /* Ensure it's above other content */
-        }
+  <!-- WebApp Schema -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebApplication",
+    "name":"Chyper Engine",
+    "url":"https://ironsignalworks.com/chyper",
+    "applicationCategory":"Utility",
+    "operatingSystem":"Any",
+    "description":"Experimental text cipher and glitch tool with chaos layers, QR output, and sonic encoding.",
+    "creator":{"@type":"Organization","name":"Iron Signal Works"}
+  }
+  </script>
 
-        .watermark img {
-            width: 60px; /* Adjust size as needed */
-            height: auto;
-        }
+  <!-- Perf: preconnect + defers -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.35/Tone.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 
-        .input-container {
-            width: 100%;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .input-container textarea {
-            width: 100%;
-            min-height: 80px;
-            resize: none;
-            transition: filter 0.3s;
-            overflow: auto;
-            box-sizing: border-box;
-        }
-
-        textarea.blurred {
-            filter: blur(5px);
-        }
-
-        #qrCanvas {
-            width: 30%;
-            max-width: 128px;
-            height: auto;
-            margin-top: 0;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-        }
-
-        textarea,
-        select {
-            width: 100%;
-            margin-top: 0.5rem;
-            background: #000;
-            color: #aaff00;
-            border: 2px solid #aaff00;
-            font-family: monospace;
-            font-size: 1rem;
-            padding: 0.5rem;
-            box-sizing: border-box;
-        }
-
-        .output {
-            width: 100%;
-            margin-top: 0.5rem;
-            background: #111;
-            color: #e0e0e0;
-            padding: 0.5rem;
-            border: 2px dashed #aaff00;
-            border-radius: 4px;
-            filter: blur(4px);
-            transition: filter 0.3s;
-            white-space: pre-wrap;
-            box-sizing: border-box;
-            min-height: 50px;
-            overflow-x: auto;
-        }
-
-        .output:hover {
-            filter: none;
-        }
-
-        .button-row,
-        .export-row,
-        .option-row {
-            width: 100%;
-            margin-top: 0.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-
-        button {
-            background: #000;
-            color: #aaff00;
-            border: 1px solid #aaff00;
-            padding: 0.3rem 0.6rem;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: background-color 0.2s, color 0.2s, transform 0.1s;
-        }
-
-        button:hover {
-            background: #aaff00;
-            color: #000;
-            transform: scale(1.05);
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        #copyFeedback {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background: #000;
-            color: #aaff00;
-            border: 1px solid #aaff00;
-            padding: 0.5rem;
-            display: none;
-            border-radius: 4px;
-            z-index: 999;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-
-        .modal-content {
-            background-color: #111;
-            margin: 10% auto;
-            padding: 20px;
-            border: 1px solid #aaff00;
-            width: 80%;
-            max-width: 600px;
-            color: #aaff00;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: white;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        /* Theme Styles */
-        .theme-selector {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .theme-button {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 1px solid #aaff00;
-            transition: transform 0.2s;
-        }
-
-        .theme-button:hover {
-            transform: scale(1.2);
-        }
-
-        .theme-button.active {
-            border-width: 3px;
-        }
-
-        /* Specific Themes */
-        .theme-default {
-            background-color: rgba(0, 0, 0, 0.85);
-            background-image: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3p1N2RuMzR6c3czenk4eDNkcTd0OHdkem92bzVpZDdhOWNlbGV4eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/quEsMOrr3hmQ8/giphy.gif');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            color: #aaff00;
-        }
-
-        .theme-hacker {
-            background-color: #000;
-            color: #0f0;
-            filter: contrast(300%) saturate(0%);
-        }
-
-        .theme-hacker h1 {
-            display: none; /* Hide the title in hacker mode */
-        }
-
-        .theme-lite {
-            background-color: #222; /* Even darker gray */
-            background-image: none;
-            color: #aaff00;
-        }
-
-        .theme-static {
-            background-color: transparent;
-            background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOWoya2k3NXFvOGxhMnI2dDg5MnNwN2VkamozeDNqMjNzeDMwYzRwbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Yqn9tE2E00k4U/giphy.gif');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            color: #aaff00;
-        }
-
-        .theme-glitch {
-            background-color: transparent;
-            background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXprbTJzeXpyYnN4MDFkdWFxendnYnoyd3RlcXJzZzFiZXZyb3p3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ph0oIVQeuvh0k/giphy.gif');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            color: #aaff00;
-        }
-    </style>
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --panel:#101010;
+      --ink:#aaff00;
+      --ink-dim:#86cc00;
+      --text:#e8e8e8;
+      --muted:#6a6a6a;
+      --border:rgba(170,255,0,.35);
+      --radius:10px;
+      --shadow:0 0 0 1px var(--border),0 8px 30px rgba(0,0,0,.6);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(1200px 800px at 50% -10%, #121212 0%, var(--bg) 55%);
+      color:var(--text);
+      font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+      display:grid;
+      place-items:center;
+    }
+    .panel{
+      width:min(920px,92vw);
+      background:linear-gradient(180deg,rgba(16,16,16,.98),rgba(12,12,12,.98));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    header{
+      display:flex;align-items:center;gap:12px;justify-content:space-between
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)
+    }
+    .brand img{width:40px;height:40px;filter:drop-shadow(0 0 6px rgba(170,255,0,.35))}
+    h1{font-size:18px;margin:0;letter-spacing:.08em;color:var(--ink)}
+    .sub{color:var(--muted);font-size:12px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    textarea, select, button, .output{
+      border-radius:8px;border:1px solid var(--border);background:#0a0a0a;color:var(--text)
+    }
+    textarea{
+      width:100%;min-height:84px;padding:10px;line-height:1.45;resize:vertical;
+      outline:none;box-shadow:inset 0 0 0 1px rgba(170,255,0,.12);
+    }
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .controls select{width:100%;padding:8px;background:#0f0f0f}
+    .toggles{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    .toggles label{font-size:12px;color:var(--muted)}
+    .btns, .exports{display:flex;gap:8px;flex-wrap:wrap}
+    button{
+      padding:8px 12px;font-weight:700;letter-spacing:.04em;cursor:pointer;
+      background:#0e0e0e;color:var(--ink);transition:transform .06s ease, background .2s ease, color .2s ease
+    }
+    button:hover{background:var(--ink);color:#000;transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+    .output{
+      background:#0d0d0d;border-style:dashed;padding:10px;min-height:60px;white-space:pre-wrap;overflow:auto
+    }
+    .sig{color:var(--muted);font-size:11px}
+    canvas{display:block;margin-inline:auto}
+    .cta{
+      border-top:1px dashed var(--border);padding-top:10px;display:flex;justify-content:space-between;gap:10px;align-items:center
+    }
+    .cta a{color:var(--ink);text-decoration:none}
+    .mini{font-size:12px;color:var(--muted)}
+    .hidden{display:none}
+    .stealth{filter:contrast(250%) saturate(0%)}
+    .blurred{filter:blur(5px)}
+    /* accessibility / motion */
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none!important;transition:none!important}
+    }
+  </style>
 </head>
-
-<body class="theme-default">
-    <div class="panel">
-        <h1>CHYPER ENGINE // BETA</h1>
-
-        <!-- Watermark -->
-        <div class="watermark">
-            <img src="isw.png" alt="Watermark">
+<body>
+  <main class="panel" role="main" aria-label="Chyper Engine interface">
+    <header>
+      <a class="brand" href="https://ironsignalworks.com" target="_blank" rel="noopener">
+        <img src="isw.png" alt="Iron Signal Works logo" />
+        <div>
+          <h1>CHYPER ENGINE // BETA</h1>
+          <div class="sub">Built in the Iron Signal Works lab</div>
         </div>
+      </a>
+      <button id="instructionsBtn" aria-haspopup="dialog" aria-controls="instructions">INSTRUCTIONS</button>
+    </header>
 
-        <div class="input-container">
-            <textarea id="inputText" placeholder="DROP YOUR SIGNAL HERE..."></textarea>
-        </div>
+    <section>
+      <label for="inputText" class="mini">Input</label>
+      <textarea id="inputText" placeholder="DROP YOUR SIGNAL HERE..." aria-label="Input text"></textarea>
+    </section>
 
-        <!-- Option Row -->
-        <div class="option-row">
-            <label><input type="checkbox" id="blurToggle" checked> Input Blur</label>
-            <label><input type="checkbox" id="decodeToggle"> Decoder Mode</label>
-            <label><input type="checkbox" id="stealthModeToggle"> Stealth Mode</label>
-        </div>
-
-        <select id="mode">
-            <option value="" disabled selected>Cypher Style</option>
-            <option value="rot13">Cold War Cuts</option>
-            <option value="reverse">Jammed Coms</option>
-            <option value="base64">Interceptor 2.0</option>
-            <option value="hex">Payload Prism</option>
-            <option value="zalgo">Radiowave Distort</option>
-            <option value="morse">Shortwave Pulse</option>
-            <option value="atbash">Signal Inversion</option>
-            <option value="qr">QR Code</option>
+    <section class="controls" aria-label="Mode controls">
+      <div>
+        <label for="mode" class="mini">Cypher Style</label>
+        <select id="mode" aria-label="Cypher style">
+          <option value="" disabled selected>Select…</option>
+          <option value="rot13">Cold War Cuts (ROT13)</option>
+          <option value="reverse">Jammed Coms (Reverse)</option>
+          <option value="base64">Interceptor 2.0 (Base64)</option>
+          <option value="hex">Payload Prism (Hex)</option>
+          <option value="zalgo">Radiowave Distort (Zalgo)</option>
+          <option value="morse">Shortwave Pulse (Morse)</option>
+          <option value="atbash">Signal Inversion (Atbash)</option>
+          <option value="qr">QR Code</option>
         </select>
-
-        <select id="chaos">
-            <option value="" disabled selected>Chaos Layer</option>
-            <option value="none">None</option>
-            <option value="ascii">ASCII Artifact</option>
-            <option value="binary">Binary Scream</option>
-            <option value="corruptedqr">Corrupted QR</option>
+      </div>
+      <div>
+        <label for="chaos" class="mini">Chaos Layer</label>
+        <select id="chaos" aria-label="Chaos layer">
+          <option value="none" selected>None</option>
+          <option value="ascii">ASCII Artifact</option>
+          <option value="binary">Binary Scream</option>
+          <option value="corruptedqr">Corrupted QR</option>
         </select>
+      </div>
+    </section>
 
-        <div class="button-row">
-            <button onclick="generate()">GENERATE</button>
-            <button onclick="togglePlayback(this)">PLAY</button>
-            <button onclick="downloadTxt()">EXPORT .TXT</button>
-            <button onclick="showInstructions()">INSTRUCTIONS</button>
-        </div>
+    <section class="toggles">
+      <label><input type="checkbox" id="blurToggle" checked /> Input Blur</label>
+      <label><input type="checkbox" id="decodeToggle" /> Decoder Mode</label>
+      <label><input type="checkbox" id="stealthModeToggle" /> Stealth Mode</label>
+      <label><input type="checkbox" id="autoCopy" /> Auto-Copy</label>
+    </section>
 
-        <div class="output" id="output"></div>
+    <section class="btns" aria-label="Actions">
+      <button id="generateBtn">GENERATE</button>
+      <button id="playBtn">PLAY</button>
+      <button id="downloadTxtBtn">EXPORT .TXT</button>
+      <button id="sequenceBtn">EXTRACT SEQUENCE</button>
+      <button id="shareBtn">SHARE</button>
+    </section>
 
-        <div class="export-row">
-            <button onclick="copyOutput()">COPY</button>
-            <button onclick="exportQR()">EXPORT QR .PNG</button>
-            <button onclick="exportASCII()">EXPORT ASCII .PNG</button>
-            <button onclick="downloadSound()">EXTRACT SEQUENCE</button>
+    <div id="output" class="output" aria-live="polite" aria-label="Output area"></div>
+    <div class="sig">Hover to reveal content if blurred. Exports include an Iron Signal Works signature.</div>
 
-            <label><input type="checkbox" id="autoCopy"> Auto‑Copy</label>
-            <button onclick="shareURL()">SHARE</button>
-        </div>
+    <section class="exports">
+      <button id="exportQRBtn">EXPORT QR .PNG</button>
+      <button id="exportASCIIBtn">EXPORT ASCII .PNG</button>
+    </section>
 
-        <!-- Theme Selector -->
-        <div class="theme-selector">
-            <div class="theme-button theme-default active" data-theme="theme-default" title="Default Mode"></div>
-            <div class="theme-button theme-hacker" data-theme="theme-hacker" title="Hacker Mode"></div>
-            <div class="theme-button theme-lite" data-theme="theme-lite" title="Lite Mode"></div>
-            <div class="theme-button theme-static" data-theme="theme-static" title="Static Mode"></div>
-            <div class="theme-button theme-glitch" data-theme="theme-glitch" title="Glitch Mode"></div>
-        </div>
-    </div>
+    <canvas id="qrCanvas" width="128" height="128" class="hidden" aria-hidden="true"></canvas>
 
-    <div id="copyFeedback">✅ Copied!</div>
+    <footer class="cta">
+      <div>
+        ⚡ Built by <a href="https://ironsignalworks.com" target="_blank" rel="noopener">Iron Signal Works</a>
+        <div class="mini">Explore more experiments &bull; contractor-ready</div>
+      </div>
+      <a class="mini" href="https://ironsignalworks.com#hire" target="_blank" rel="noopener">Hire us →</a>
+    </footer>
+  </main>
 
-    <script>
-        let synth,
-            playing = false,
-            notes = [];
-        let stealthModeActive = false;
-        let audioContext;
+  <dialog id="instructions" aria-label="Chyper Engine instructions">
+    <form method="dialog" style="max-width:min(720px,92vw);border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:#101010;color:var(--text)">
+      <h3 style="margin-top:0;color:var(--ink)">Chyper Engine — Instructions</h3>
+      <ul>
+        <li><b>Cypher Style</b>: choose how to encode (or decode with Decoder Mode).</li>
+        <li><b>Chaos Layer</b>: add ASCII, Binary, or QR corruption.</li>
+        <li><b>PLAY</b>: hear a “sonic echo” of your input as notes.</li>
+        <li><b>Exports</b>: TXT / ASCII PNG / QR PNG — all stamped with an Iron Signal Works signature.</li>
+        <li><b>SHARE</b>: copies a URL to reload your exact state (with UTM tags for tracking).</li>
+      </ul>
+      <button value="close">Close</button>
+    </form>
+  </dialog>
 
-        // Initialize AudioContext
-        async function initializeAudioContext() {
-            if (!audioContext) {
-                audioContext = new(window.AudioContext || window.webkitAudioContext)();
-                if (audioContext.state === 'suspended') {
-                    await audioContext.resume();
-                }
-            }
-            return audioContext;
-        }
+  <div id="copyFeedback" class="hidden" style="position:fixed;right:12px;top:12px;background:#0a0a0a;border:1px solid var(--border);color:var(--ink);padding:8px 10px;border-radius:8px">✅ Copied</div>
 
-        function cypherText(str, mode) {
-            const cypherFunctions = {
-                rot13: (str) => str.replace(/[a-zA-Z]/g, c => {
-                    const base = c <= 'Z' ? 65 : 97;
-                    return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
-                }),
-                reverse: (str) => str.split('').reverse().join(''),
-                base64: (str) => btoa(unescape(encodeURIComponent(str))),
-                hex: (str) => Array.from(str).map(c => c.charCodeAt(0).toString(16)).join(' '),
-                zalgo: (str) => str.split('').map(c => c + '\u0301').join(''),
-                morse: (str) => {
-                    const morse = {
-                        '.-': 'a',
-                            '-...': 'b',
-                            '-.-.': 'c',
-                            '-..': 'd',
-                            '.': 'e',
-                            '..-.': 'f',
-                            '--.': 'g',
-                            '....': 'h',
-                            '..': 'i',
-                            '.---': 'j',
-                            '-.-': 'k',
-                            '.-..': 'l',
-                            '--': 'm',
-                            '-.': 'n',
-                            '---': 'o',
-                            '.--.': 'p',
-                            '--.-': 'q',
-                            '.-.': 'r',
-                            '...': 's',
-                            '-': 't',
-                            '..-': 'u',
-                            '...-': 'v',
-                            '.--': 'w',
-                            '-..-': 'x',
-                            '-.--': 'y',
-                            '--..': 'z',
-                            '/': ' '
-                    };
-                    return str.toLowerCase().split('').map(code => morse[code] || code).join('');
-                },
-                atbash: (str) => str.replace(/[a-z]/gi, c => {
-                    const isUpper = c === c.toUpperCase();
-                    const base = isUpper ? 65 : 97;
-                    return String.fromCharCode(base + (25 - (c.toLowerCase().charCodeAt(0) - 97)));
-                }),
-                qr: (str) => generateQRCode(str),
-            };
+  <noscript>
+    <div style="margin-top:10px;color:#ff6b6b">This app needs JavaScript enabled.</div>
+  </noscript>
 
-            return cypherFunctions[mode] ? cypherFunctions[mode](str) : str;
-        }
+  <script>
+  // ====== State ======
+  let notes = [];
+  let playing = false;
+  let synthReady = false;
 
-        function applyChaos(str, chaos) {
-            const chaosFunctions = {
-                none: (str) => str,
-                ascii: (str) => str.split('').map(c => c.charCodeAt(0)).join(' '),
-                binary: (str) => str.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' '),
-                corruptedqr: (str) => corruptQRCode(str),
-            };
+  const els = {
+    input: document.getElementById('inputText'),
+    mode: document.getElementById('mode'),
+    chaos: document.getElementById('chaos'),
+    decodeToggle: document.getElementById('decodeToggle'),
+    blurToggle: document.getElementById('blurToggle'),
+    stealthToggle: document.getElementById('stealthModeToggle'),
+    autoCopy: document.getElementById('autoCopy'),
+    output: document.getElementById('output'),
+    playBtn: document.getElementById('playBtn'),
+    exportQRBtn: document.getElementById('exportQRBtn'),
+    exportASCIIBtn: document.getElementById('exportASCIIBtn'),
+    qrCanvas: document.getElementById('qrCanvas'),
+    copyFeedback: document.getElementById('copyFeedback'),
+    instructionsBtn: document.getElementById('instructionsBtn'),
+    instructions: document.getElementById('instructions'),
+    generateBtn: document.getElementById('generateBtn'),
+    downloadTxtBtn: document.getElementById('downloadTxtBtn'),
+    sequenceBtn: document.getElementById('sequenceBtn'),
+    shareBtn: document.getElementById('shareBtn'),
+    panel: document.querySelector('.panel')
+  };
 
-            return chaosFunctions[chaos] ? chaosFunctions[chaos](str) : str;
-        }
+  // ====== Utilities ======
+  const SIG_LINE = "\n\n=== Generated with Chyper Engine // Iron Signal Works ===\nhttps://ironsignalworks.com\n";
+  const MORSE_TABLE = {
+    A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',
+    M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',
+    Y:'-.--',Z:'--..', '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+    '6':'-....','7':'--...','8':'---..','9':'----.', ' ':'/'
+  };
+  const MORSE_REV = Object.fromEntries(Object.entries(MORSE_TABLE).map(([k,v])=>[v,k]));
 
-        function decodeText(str, mode, chaos) {
-            let decoded = str;
+  function showCopyToast(){
+    els.copyFeedback.classList.remove('hidden');
+    setTimeout(()=>els.copyFeedback.classList.add('hidden'),1200);
+  }
 
-            try {
-                const reverseChaos = {
-                    binary: (str) => str.split(' ').map(binary => String.fromCharCode(parseInt(binary, 2))).join(''),
-                    ascii: (str) => str.split(' ').map(ascii => String.fromCharCode(ascii)).join(''),
-                    none: (str) => str,
-                };
+  function setStealth(on){ document.body.classList.toggle('stealth', !!on); }
+  function setBlur(on){ els.input.classList.toggle('blurred', !!on); }
 
-                decoded = reverseChaos[chaos] ? reverseChaos[chaos](decoded) : decoded;
+  function clampCanvasSize(base){ return Math.max(64, Math.min(base, 256)); }
 
-                const reverseCypher = {
-                    rot13: (str) => str.replace(/[a-zA-Z]/g, c => {
-                        const base = c <= 'Z' ? 65 : 97;
-                        return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
-                    }),
-                    reverse: (str) => str.split('').reverse().join(''),
-                    base64: (str) => decodeURIComponent(escape(atob(str))),
-                    hex: (str) => str.split(' ').map(hex => String.fromCharCode(parseInt(hex, 16))).join(''),
-                    zalgo: (str) => str.replace(/\u0301/g, ''),
-                    morse: (str) => {
-                        const morse = {
-                            '.-': 'a',
-                            '-...': 'b',
-                            '-.-.': 'c',
-                            '-..': 'd',
-                            '.': 'e',
-                            '..-.': 'f',
-                            '--.': 'g',
-                            '....': 'h',
-                            '..': 'i',
-                            '.---': 'j',
-                            '-.-': 'k',
-                            '.-..': 'l',
-                            '--': 'm',
-                            '-.': 'n',
-                            '---': 'o',
-                            '.--.': 'p',
-                            '--.-': 'q',
-                            '.-.': 'r',
-                            '...': 's',
-                            '-': 't',
-                            '..-': 'u',
-                            '...-': 'v',
-                            '.--': 'w',
-                            '-..-': 'x',
-                            '-.--': 'y',
-                            '--..': 'z',
-                            '/': ' '
-                        };
-                        return str.split(' ').map(code => morse[code] || code).join('');
-                    },
-                    atbash: (str) => str.replace(/[a-z]/gi, c => {
-                        const isUpper = c === c.toUpperCase();
-                        const base = isUpper ? 65 : 97;
-                        return String.fromCharCode(base + (25 - (c.toLowerCase().charCodeAt(0) - 97)));
-                    }),
-                };
-
-                decoded = reverseCypher[mode] ? reverseCypher[mode](decoded) : decoded;
-
-            } catch (e) {
-                console.error("Decoding Error:", e);
-                return "Decoding Error";
-            }
-
-            return decoded;
-        }
-
-        function generateQRCode(text) {
-            const canvas = document.getElementById("qrCanvas");
-            const ctx = canvas.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const containerWidth = document.querySelector('.input-container').offsetWidth;
-            let canvasSize = Math.min(containerWidth * 0.3, 128);
-            canvasSize = Math.max(canvasSize, 64);
-            canvas.width = canvasSize;
-            canvas.height = canvasSize;
-
-            const qr = qrcode(4, 'L');
-            qr.addData(text);
-            qr.make();
-
-            const moduleCount = qr.getModuleCount();
-            const tileW = Math.ceil(canvas.width / moduleCount);
-            const tileH = Math.ceil(canvas.height / moduleCount);
-
-            const xOffset = 0;
-            const yOffset = 0;
-
-            for (let row = 0; row < moduleCount; row) {
-                for (let col = 0; col < moduleCount; col++) {
-                    ctx.fillStyle = qr.isDark(row, col) ? '#aaff00' : '#000';
-                    const x = col * tileW + xOffset;
-                    const y = row * tileH + yOffset;
-                    ctx.fillRect(x, y, tileW, tileH);
-                }
-            }
-            return canvas.toDataURL();
-        }
-
-        function corruptQRCode(qrCodeDataURL) {
-            const canvas = document.getElementById("qrCanvas");
-            const ctx = canvas.getContext("2d");
-
-            const img = new Image();
-            img.src = qrCodeDataURL;
-
-            img.onload = () => {
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                for (let i = 0; i < 1000; i++) {
-                    const x = Math.floor(Math.random() * canvas.width);
-                    const y = Math.floor(Math.random() * canvas.height);
-                    const dx = Math.floor(Math.random() * 10) - 5;
-                    const dy = Math.floor(Math.random() * canvas.height) - 5;
-
-                    const pixel = ctx.getImageData(x, y, 1, 1).data;
-                    const r = pixel[0];
-                    const g = pixel[1];
-                    const b = pixel[2];
-                    const a = pixel[3];
-
-                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
-                    ctx.fillRect(x + dx, y + dy, 1, 1);
-                }
-            };
-            return canvas.toDataURL();
-        }
-
-        function toggleStealthMode() {
-            stealthModeActive = !stealthModeActive;
-            document.body.style.filter = stealthModeActive ? 'contrast(300%) saturate(0%)' : 'none';
-        }
-
-        function textToNotes(text) {
-            const notes = ['C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5'];
-            return text.split('').map(char => {
-                const code = char.charCodeAt(0);
-                return notes[code % notes.length];
-            });
-        }
-
-        function generate() {
-            const input = document.getElementById('inputText').value;
-            const mode = document.getElementById('mode').value;
-            const chaos = document.getElementById('chaos').value;
-            const decodeMode = document.getElementById('decodeToggle').checked;
-
-            let outputText = "";
-
-            if (decodeMode) {
-                outputText = `>>> DECODED TEXT >>>\n${decodeText(input, mode, chaos)}`;
-            } else {
-                let cyphered = cypherText(input, mode);
-                cyphered = applyChaos(cyphered, chaos);
-
-                notes = textToNotes(input);
-                outputText = `>>> CYPHERED TEXT >>>\n${cyphered}\n\n>>> SONIC ECHO >>>\n${notes.join(' ')}`;
-            }
-
-            document.getElementById('output').innerText = outputText;
-            if (document.getElementById('autoCopy').checked) copyOutput();
-
-            // Visual feedback for generate button
-            const generateButton = document.querySelector('button[onclick="generate()"]');
-            generateButton.style.backgroundColor = '#aaff00';
-            generateButton.style.color = '#000';
-            setTimeout(() => {
-                generateButton.style.backgroundColor = '#000';
-                generateButton.style.color = '#aaff00';
-            }, 300);
-        }
-
-        async function togglePlayback(button) {
-            if (!synth) {
-                synth = new Tone.Synth({
-                    oscillator: {
-                        type: 'square'
-                    },
-                    envelope: {
-                        attack: 0.01,
-                        decay: 0.1,
-                        sustain: 0.3,
-                        release: 0.8
-                    }
-                }).toDestination();
-            }
-            await Tone.start();
-
-            if (playing) {
-                Tone.Transport.stop();
-                Tone.Transport.cancel();
-                playing = false;
-                button.innerText = 'PLAY';
-            } else {
-                Tone.Transport.cancel();
-                let time = 0;
-                notes.forEach(note => {
-                    Tone.Transport.schedule(function(scheduledTime) {
-                        synth.triggerAttackRelease(note, '8n', scheduledTime);
-                    }, time);
-                    time += 0.2;
-                });
-                Tone.Transport.start();
-                playing = true;
-                button.innerText = 'STOP';
-            }
-        }
-
-        function downloadTxt() {
-            const text = document.getElementById('output').innerText;
-            const blob = new Blob([text], {
-                type: 'text/plain'
-            });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'chyper_output.txt';
-            link.click();
-        }
-
-        function copyOutput() {
-            const output = document.getElementById('output');
-            if (!output) return;
-
-            const text = output.innerText || output.textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                showCopyFeedback();
-            }).catch(err => {
-                alert('❌ Failed to copy.');
-                console.error(err);
-            });
-        }
-
-        function showCopyFeedback() {
-            const feedback = document.getElementById('copyFeedback');
-            feedback.style.display = 'block';
-            setTimeout(() => {
-                feedback.style.display = 'none';
-            }, 1500);
-        }
-
-        function exportQR() {
-            const canvas = document.getElementById('qrCanvas');
-            if (!canvas) {
-                alert('No QR code generated.');
-                return;
-            }
-
-            const mode = document.getElementById('mode').value;
-            const chaos = document.getElementById('chaos').value;
-
-            if (mode === 'qr' || chaos === 'corruptedqr') {
-                const imgData = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.href = imgData;
-                link.download = 'chyper_qr.png';
-                link.click();
-            } else {
-                alert('No QR code to export.');
-            }
-        }
-
-        function exportASCII() {
-            const outputText = document.getElementById('output').innerText;
-            const asciiArt = convertTextToAsciiArt(outputText);
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const fontSize = 10;
-            const fontFamily = 'Courier New, monospace';
-            const lineHeight = fontSize * 1.2;
-            const lines = asciiArt.split('\n');
-            const maxLineWidth = Math.max(...lines.map(line => line.length));
-
-            canvas.width = maxLineWidth * fontSize * 0.6;
-            const canvasHeight = Math.min(lines.length * lineHeight, 200);
-            canvas.height = canvasHeight;
-
-            ctx.font = `${fontSize}px ${fontFamily}`;
-            ctx.fillStyle = '#aaff00';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#000';
-
-            lines.forEach((line, index) => {
-                if (index * lineHeight < canvasHeight) {
-                    ctx.fillText(line, 0, (index + 1) * lineHeight);
-                }
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = imgData;
-            link.download = 'chyper_ascii.png';
-            link.click();
-        }
-
-        function convertTextToAsciiArt(text) {
-            return text;
-        }
-
-        function adjustTextareaHeight(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }
-
-        // Theme Switching
-        function setTheme(themeName) {
-            document.body.className = themeName;
-            localStorage.setItem('theme', themeName); // Save theme to local storage
-            // Update active state on theme buttons
-            document.querySelectorAll('.theme-button').forEach(button => {
-                button.classList.remove('active');
-                if (button.dataset.theme === themeName) {
-                    button.classList.add('active');
-                }
-            });
-
-            // Apply stealth mode filter if hacker theme is selected
-            if (themeName === 'theme-hacker') {
-                document.body.style.filter = 'contrast(300%) saturate(0%)';
-            } else {
-                document.body.style.filter = 'none'; // Remove stealth mode filter
-            }
-        }
-
-        // Load saved theme or default to default
-        const savedTheme = localStorage.getItem('theme') || 'theme-default';
-        setTheme(savedTheme);
-
-        // Event listeners for theme buttons
-        document.querySelectorAll('.theme-button').forEach(button => {
-            button.addEventListener('click', () => {
-                setTheme(button.dataset.theme);
-            });
+  // ====== Cypher / Chaos ======
+  function cypherText(str, mode){
+    switch(mode){
+      case 'rot13':
+        return str.replace(/[a-zA-Z]/g, c=>{
+          const base = c <= 'Z' ? 65 : 97;
+          return String.fromCharCode((c.charCodeAt(0)-base+13)%26+base);
         });
-
-        // URL Sharing
-        function shareURL() {
-            const inputText = document.getElementById('inputText').value;
-            const mode = document.getElementById('mode').value;
-            const chaos = document.getElementById('chaos').value;
-
-            const baseUrl = window.location.origin + window.location.pathname;
-            const params = new URLSearchParams();
-            params.append('msg', btoa(inputText));
-            params.append('mode', mode);
-            params.append('chaos', chaos);
-
-            const shareUrl = baseUrl + '?' + params.toString();
-
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                alert('URL copied to clipboard!');
-            }).catch(err => {
-                console.error('Error copying URL: ', err);
-                alert('Failed to copy URL.');
-            });
-        }
-
-        // Initialization
-        window.onload = () => {
-            const p = new URLSearchParams(location.search);
-            if (p.has('msg')) {
-                document.getElementById('inputText').value = atob(p.get('msg'));
-                document.getElementById('mode').value = p.get('mode') || 'rot13';
-                document.getElementById('chaos').value = p.get('chaos') || 'none';
-                generate();
-            }
-        };
-
-        document.getElementById('stealthModeToggle').addEventListener('change', toggleStealthMode);
-        document.getElementById('inputText').addEventListener('input', function() {
-            adjustTextareaHeight(this);
+      case 'reverse':
+        return [...str].reverse().join('');
+      case 'base64':
+        return btoa(unescape(encodeURIComponent(str)));
+      case 'hex':
+        return Array.from(str).map(c=>c.charCodeAt(0).toString(16)).join(' ');
+      case 'zalgo':
+        return Array.from(str).map(c=>c+'\u0301').join('');
+      case 'morse':
+        return Array.from(str.toUpperCase()).map(ch=>MORSE_TABLE[ch] ?? ch).join(' ');
+      case 'atbash':
+        return str.replace(/[a-z]/gi, c=>{
+          const isU = c===c.toUpperCase(); const code=c.toLowerCase().charCodeAt(0)-97;
+          const m = String.fromCharCode(97+(25-code));
+          return isU ? m.toUpperCase(): m;
         });
+      case 'qr':
+        return generateQRCode(str); // returns dataURL
+      default:
+        return str;
+    }
+  }
 
-        const blurToggle = document.getElementById('blurToggle');
-        const inputText = document.getElementById('inputText');
+  function reverseChaos(str, chaos){
+    switch(chaos){
+      case 'binary': return str.trim().split(/\s+/).map(b=>String.fromCharCode(parseInt(b,2))).join('');
+      case 'ascii':  return str.trim().split(/\s+/).map(n=>String.fromCharCode(parseInt(n,10))).join('');
+      default:       return str;
+    }
+  }
 
-        function toggleBlur() {
-            if (blurToggle.checked) {
-                inputText.classList.add('blurred');
-            } else {
-                inputText.classList.remove('blurred');
-            }
-        }
+  function decodeText(str, mode, chaos){
+    let decoded = reverseChaos(str, chaos);
+    try{
+      switch(mode){
+        case 'rot13': return cypherText(decoded,'rot13');
+        case 'reverse': return cypherText(decoded,'reverse');
+        case 'base64': return decodeURIComponent(escape(atob(decoded)));
+        case 'hex': return decoded.trim().split(/\s+/).map(h=>String.fromCharCode(parseInt(h,16))).join('');
+        case 'zalgo': return decoded.replace(/\u0301/g,'');
+        case 'morse': return decoded.trim().split(/\s+/).map(tok=>MORSE_REV[tok] ?? tok).join('').replace(/\//g,' ');
+        case 'atbash': return cypherText(decoded,'atbash');
+        case 'qr': return "[QR cannot be decoded here]";
+        default: return decoded;
+      }
+    }catch(e){ console.error(e); return "Decoding Error"; }
+  }
 
-        blurToggle.addEventListener('change', toggleBlur);
-        toggleBlur();
+  function applyChaos(str, chaos){
+    switch(chaos){
+      case 'ascii': return Array.from(str).map(c=>c.charCodeAt(0)).join(' ');
+      case 'binary': return Array.from(str).map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+      case 'corruptedqr': return corruptQRCode(str);
+      default: return str;
+    }
+  }
 
-        function showInstructions() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.id = 'instructionsModal';
+  // ====== QR ======
+  function generateQRCode(text){
+    const canvas = els.qrCanvas;
+    const ctx = canvas.getContext('2d');
+    const containerW = els.panel.clientWidth;
+    const size = clampCanvasSize(Math.floor(containerW*0.25));
+    canvas.width = canvas.height = size;
 
-            const modalContent = document.createElement('div');
-            modalContent.className = 'modal-content';
+    const qr = qrcode(4,'L');
+    qr.addData(text); qr.make();
 
-            const closeButton = document.createElement('span');
-            closeButton.className = 'close';
-            closeButton.innerHTML = '&times;';
-            closeButton.onclick = function() {
-                modal.style.display = "none";
-            };
+    const m = qr.getModuleCount();
+    const tile = Math.ceil(size / m);
 
-            const iframe = document.createElement('iframe');
-            iframe.src = 'instructions.html';
-            iframe.style.width = '100%';
-            iframe.style.height = '400px';
-            iframe.style.border = 'none';
+    ctx.clearRect(0,0,size,size);
+    ctx.fillStyle = '#000'; ctx.fillRect(0,0,size,size);
+    for(let r=0;r<m;r++){
+      for(let c=0;c<m;c++){
+        ctx.fillStyle = qr.isDark(r,c) ? '#aaff00' : '#000';
+        ctx.fillRect(c*tile, r*tile, tile, tile);
+      }
+    }
+    // signature footer
+    ctx.fillStyle = 'rgba(0,0,0,.7)';
+    ctx.fillRect(0,size-18,size,18);
+    ctx.fillStyle = '#aaff00';
+    ctx.font = '11px ui-monospace, monospace';
+    ctx.fillText('ironsignalworks.com', 6, size-6);
+    return canvas.toDataURL('image/png');
+  }
 
-            modalContent.appendChild(closeButton);
-            modalContent.appendChild(iframe);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-            modal.style.display = "block";
+  function corruptQRCode(qrDataURL){
+    // accept dataURL from generateQRCode OR raw text (generate first if needed)
+    const data = qrDataURL.startsWith('data:') ? qrDataURL : generateQRCode(qrDataURL);
+    const canvas = els.qrCanvas, ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = ()=>{
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      const n = Math.floor(canvas.width*canvas.height*0.02);
+      for(let i=0;i<n;i++){
+        const x = Math.floor(Math.random()*canvas.width);
+        const y = Math.floor(Math.random()*canvas.height);
+        const w = 1+Math.floor(Math.random()*3);
+        const h = 1+Math.floor(Math.random()*3);
+        const dx = (Math.random()<.5?-1:1)*Math.floor(Math.random()*6);
+        const dy = (Math.random()<.5?-1:1)*Math.floor(Math.random()*6);
+        const block = ctx.getImageData(x,y,w,h);
+        ctx.putImageData(block,x+dx,y+dy);
+      }
+    };
+    img.src = data;
+    return canvas.toDataURL('image/png');
+  }
 
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            };
-        }
+  // ====== Sonic echo ======
+  async function ensureSynth(){
+    if (synthReady) return;
+    try{
+      await Tone.start();
+      synthReady = true;
+    }catch(e){ console.warn('Audio context not started yet'); }
+  }
 
-        function downloadSound() {
-            if (!notes || notes.length === 0) {
-                alert("No notes generated.");
-                return;
-            }
+  function textToNotes(text){
+    const scale = ['C5','D5','E5','F5','G5','A5','B5'];
+    return Array.from(text).map(ch => scale[ch.charCodeAt(0)%scale.length]);
+  }
 
-            const soundData = notes.join(',');
-            const blob = new Blob([soundData], {
-                type: 'text/plain'
-            });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'chyper_sequence.txt'; // Changed filename
-            link.click();
-        }
-    </script>
+  function scheduleNotes(seq){
+    Tone.Transport.cancel();
+    const synth = new Tone.Synth({ oscillator:{type:'square'}, envelope:{attack:.01,decay:.1,sustain:.3,release:.8} }).toDestination();
+    let t=0;
+    seq.forEach(n=>{
+      Tone.Transport.schedule((time)=> synth.triggerAttackRelease(n,'8n',time), t);
+      t += 0.2;
+    });
+    Tone.Transport.start();
+  }
+
+  // ====== Actions ======
+  function generate(){
+    const input = els.input.value ?? '';
+    const mode = els.mode.value;
+    const chaos = els.chaos.value;
+    const decodeMode = els.decodeToggle.checked;
+
+    let out = '';
+    if (decodeMode){
+      out = ">>> DECODED TEXT >>>\n" + decodeText(input,mode,chaos);
+    } else {
+      let cy = cypherText(input,mode);
+      // if QR selected, cy is dataURL — still show notice + stash canvas
+      if (mode==='qr'){
+        // already drew into canvas; cy is data URL
+        out = ">>> QR READY >>>\n(Use EXPORT QR .PNG)\n";
+      } else {
+        cy = applyChaos(cy,chaos);
+        notes = textToNotes(input);
+        out = ">>> CYPHERED TEXT >>>\n" + cy + "\n\n>>> SONIC ECHO >>>\n" + notes.join(' ');
+      }
+    }
+    els.output.textContent = out;
+
+    if (els.autoCopy.checked){
+      navigator.clipboard.writeText(out + SIG_LINE).then(showCopyToast).catch(()=>{});
+    }
+  }
+
+  function exportQR(){
+    if (els.mode.value!=='qr' && els.chaos.value!=='corruptedqr'){
+      alert('No QR to export. Choose QR Code or Corrupted QR.'); return;
+    }
+    const data = els.qrCanvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = data; a.download = 'chyper_qr.png'; a.click();
+  }
+
+  function exportASCII(){
+    const out = els.output.textContent || '';
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const lines = (out + SIG_LINE).split('\n');
+    const font = '12px ui-monospace, monospace';
+    ctx.font = font;
+    const width = Math.min(1200, Math.max(...lines.map(l => ctx.measureText(l).width)) + 16);
+    const lineH = 16;
+    const height = Math.min(1000, lines.length * lineH + 12);
+    canvas.width = Math.ceil(width); canvas.height = Math.ceil(height);
+    // bg + frame
+    ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = 'rgba(170,255,0,.35)'; ctx.strokeRect(0.5,0.5,canvas.width-1,canvas.height-1);
+    // text
+    ctx.font = font; ctx.fillStyle = '#aaff00';
+    lines.forEach((l,i)=> ctx.fillText(l,8, (i+1)*lineH));
+    const data = canvas.toDataURL('image/png');
+    const a = document.createElement('a'); a.href = data; a.download = 'chyper_ascii.png'; a.click();
+  }
+
+  function downloadTxt(){
+    const text = (els.output.textContent || '') + SIG_LINE;
+    const blob = new Blob([text],{type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'chyper_output.txt'; a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function downloadSequence(){
+    if (!notes.length){ alert('No notes generated.'); return; }
+    const body = notes.join(',') + SIG_LINE;
+    const blob = new Blob([body],{type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'chyper_sequence.txt'; a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function shareURL(){
+    const baseUrl = "https://ironsignalworks.com/chyper";
+    const p = new URLSearchParams();
+    p.set('msg', btoa(els.input.value || ''));
+    p.set('mode', els.mode.value || '');
+    p.set('chaos', els.chaos.value || '');
+    // Tracking
+    p.set('utm_source','chyper');
+    p.set('utm_medium','share');
+    p.set('utm_campaign','lab-to-site');
+    const share = baseUrl + '?' + p.toString();
+    navigator.clipboard.writeText(share).then(()=>showCopyToast());
+  }
+
+  // ====== Events ======
+  els.generateBtn.addEventListener('click', generate);
+
+  els.playBtn.addEventListener('click', async ()=>{
+    await ensureSynth();
+    if (playing){
+      Tone.Transport.stop(); Tone.Transport.cancel();
+      playing = false; els.playBtn.textContent='PLAY';
+    } else {
+      if (!notes.length){ notes = textToNotes(els.input.value || ''); }
+      scheduleNotes(notes);
+      playing = true; els.playBtn.textContent='STOP';
+    }
+  });
+
+  els.downloadTxtBtn.addEventListener('click', downloadTxt);
+  els.sequenceBtn.addEventListener('click', downloadSequence);
+  els.exportQRBtn.addEventListener('click', exportQR);
+  els.exportASCIIBtn.addEventListener('click', exportASCII);
+  els.shareBtn.addEventListener('click', shareURL);
+
+  els.stealthToggle.addEventListener('change', e=> setStealth(e.target.checked));
+  els.blurToggle.addEventListener('change', e=> setBlur(e.target.checked));
+
+  // Auto-resize textarea (cheap + performant)
+  const autoSize = ()=>{
+    els.input.style.height = 'auto';
+    els.input.style.height = Math.min(420, Math.max(84, els.input.scrollHeight)) + 'px';
+  };
+  els.input.addEventListener('input', ()=> requestAnimationFrame(autoSize));
+  autoSize();
+
+  // Instructions modal
+  els.instructionsBtn.addEventListener('click', ()=> els.instructions.showModal());
+
+  // Load from params (shared links)
+  (function initFromURL(){
+    const p = new URLSearchParams(location.search);
+    if (p.has('msg')){
+      try{ els.input.value = atob(p.get('msg')); } catch(_){}
+    }
+    if (p.has('mode')) els.mode.value = p.get('mode') || '';
+    if (p.has('chaos')) els.chaos.value = p.get('chaos') || 'none';
+    // Generate automatically if there was a message
+    if (p.has('msg')){
+      // If QR is chosen, draw it now to prep export
+      if ((els.mode.value||'') === 'qr'){ generateQRCode(els.input.value||''); }
+      generate();
+    }
+  })();
+
+  // Defaults
+  setStealth(false); setBlur(true);
+  </script>
 </body>
-
 </html>
