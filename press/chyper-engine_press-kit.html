@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CHYPER ENGINE — Press Kit</title>
+<meta name="description" content="Chyper Engine Press Kit — cipher playground with chaos layers, QR, and sonic echo. Built by Iron Signal Works." />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+:root{
+  --bg:#0b0b0b; --panel:#101010; --ink:#aaff00; --text:#e8e8e8; --muted:#9aa19a; --border:rgba(170,255,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 800px at 50% -10%, #121212 0%, var(--bg) 55%);color:var(--text);font:16px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono","Courier New",monospace;display:flex;justify-content:center;padding:24px}
+.main{width:min(880px,92vw);background:linear-gradient(180deg,rgba(16,16,16,.98),rgba(12,12,12,.98));border:1px solid var(--border);border-radius:10px;box-shadow:0 0 0 1px var(--border),0 20px 60px rgba(0,0,0,.6);padding:20px 18px}
+h1,h2{color:var(--ink);margin:0 0 10px 0;letter-spacing:.05em}
+h1{font-size:22px}
+h2{font-size:16px;margin-top:18px}
+a{color:var(--ink)}
+.badge{display:inline-block;border:1px solid var(--border);padding:2px 8px;border-radius:999px;color:var(--ink);font-weight:700;letter-spacing:.05em;margin-bottom:6px}
+ul{padding-left:18px;margin:8px 0}
+.small{color:var(--muted);font-size:12px}
+.hr{height:1px;background:linear-gradient(90deg,transparent, var(--border), transparent);margin:16px 0}
+@media print{
+  body{background:#fff;color:#000}
+  .main{box-shadow:none;border:1px solid #000}
+  a{color:#000;text-decoration:underline}
+}
+</style>
+</head>
+<body>
+  <article class="main" role="main" aria-label="Chyper Engine press kit">
+    <span class="badge">Press Kit</span>
+    <h1>CHYPER ENGINE — Iron Signal Works</h1>
+    <p><strong>One-liner:</strong> Chyper Engine is a browser-based cipher playground that encodes/decodes text, adds chaos layers, generates QR codes, and turns your message into a <em>sonic echo</em>—all locally in your browser. No tracking. No uploads.</p>
+
+    <div class="hr"></div>
+
+    <h2>Elevator pitch</h2>
+    <p>Chyper Engine is a compact, neon‑terminal web app built in the <strong>Iron Signal Works</strong> lab. Drop in any text, pick a <strong>Cypher Style</strong> (ROT13, Reverse, Base64, Hex, Zalgo, Morse, Atbash, QR Code) and optionally add a <strong>Chaos Layer</strong> (ASCII, Binary, Corrupted QR). Decode the other way around with <strong>Decoder Mode</strong>, export <strong>QR</strong> and <strong>ASCII</strong> images, <strong>copy/share</strong> stateful links (with UTM), and even <strong>play</strong> your message back as a note sequence—the app maps characters to pitch for a playful signal → sound translation. Everything runs locally in the browser.</p>
+
+    <h2>Core features</h2>
+    <ul>
+      <li>Encode &amp; decode: ROT13, Reverse, Base64, Hex, Zalgo, Morse, Atbash, QR Code.</li>
+      <li>Chaos layers: ASCII Artifact, Binary Scream, Corrupted QR.</li>
+      <li><strong>Sonic Echo</strong>: convert text to a sequence of musical notes and play it.</li>
+      <li>Exports: <strong>TXT</strong>, <strong>ASCII PNG</strong>, <strong>QR PNG</strong>, note sequence as <strong>.txt</strong>.</li>
+      <li><strong>Share</strong>: copies a URL that reloads your exact state (with UTM for analytics).</li>
+      <li><strong>Branding baked in</strong>: optional ISW signature on exports (traffic back to site).</li>
+      <li><strong>Privacy by design</strong>: local-only processing; no tracking, no uploads.</li>
+      <li>Accessibility: labeled controls, reduced motion support, high-contrast stealth mode.</li>
+    </ul>
+
+    <h2>Who it’s for</h2>
+    <p>Artists, designers, developers, ARG/alt‑reality makers, puzzle communities, educators, social creators, and anyone who wants to obfuscate, stylize, or perform text in a shareable, audiovisual way.</p>
+
+    <h2>Tech notes</h2>
+    <ul>
+      <li>Built with vanilla JS + Web APIs (Canvas, Clipboard, Web Audio via Tone.js).</li>
+      <li>QR via <code>qrcode-generator</code>. Audio scheduling via Tone.Transport.</li>
+      <li>Designed for current Chromium browsers; recent Safari/Firefox supported.</li>
+      <li>Exports include a small footer signature and can be disabled in code.</li>
+      <li>Share links persist <strong>input</strong>, <strong>mode</strong>, and <strong>chaos</strong> as URL params.</li>
+    </ul>
+
+    <h2>Visual identity</h2>
+    <ul>
+      <li>Primary color: Neon ISW Green — <code>#aaff00</code></li>
+      <li>Background: Deep Black/Graphite — <code>#0b0b0b</code> → <code>#121212</code> gradients</li>
+      <li>Typeface: System monospace (SFMono / Consolas / Menlo / Courier New)</li>
+      <li>UI motifs: terminal‑like panel, dashed output frame, subtle CRT vibe</li>
+    </ul>
+
+    <h2>Suggested assets</h2>
+    <ul>
+      <li>App hero screenshot (panel with Cypher/Chaos/Output).</li>
+      <li>QR export example (clean + corrupted).</li>
+      <li>ASCII export example (with signature).</li>
+      <li>Short clip of “Sonic Echo” note playback.</li>
+      <li>ISW logo on dark background (PNG/SVG).</li>
+    </ul>
+
+    <h2>Boilerplate (Iron Signal Works)</h2>
+    <p><em>Iron Signal Works</em> builds playful web tools, experimental interfaces, and audio systems with a glitch/brutalist edge—contractor‑ready with clean code under the hood.</p>
+
+    <h2>Attribution &amp; usage</h2>
+    <ul>
+      <li>Please credit: “Chyper Engine — Iron Signal Works (ironsignalworks.com)” when embedding screenshots or exports.</li>
+      <li>Press may use provided assets and screenshots for coverage.</li>
+    </ul>
+
+    <h2>Contact &amp; links</h2>
+    <ul>
+      <li>Site: <strong>https://ironsignalworks.com</strong></li>
+      <li>App: <strong>https://ironsignalworks.com/chyper</strong></li>
+      <li>Email: <strong>web@ironsignalworks.com</strong></li>
+      <li>Social: @ironsignalworks (where applicable)</li>
+    </ul>
+
+    <p class="small">Last updated: 2025-09-05</p>
+  </article>
+</body>
+</html>
