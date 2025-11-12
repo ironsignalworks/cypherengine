@@ -1,0 +1,14 @@
+{
+  "name": "cypherengine",
+  "version": "1.0.0",
+  "description": "Chyper Engine — encode/decode text with chaos layers, QR output, and sonic echoes",
+  "type": "module",
+  "main": "js/app.js",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": ["cipher", "encoder", "qr", "audio", "glitch"],
+  "author": "Iron Signal Works",
+  "license": "MIT"
+}

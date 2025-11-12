@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Module Test</title>
+</head>
+<body>
+  <h1>ES Module Test</h1>
+  <div id="status">Loading modules...</div>
+  
+  <script type="module">
+    import { init } from './js/app.js';
+    import { cypherText } from './js/cypher.js';
+    import { textToNotes } from './js/audio.js';
+    
+    const status = document.getElementById('status');
+    
+    try {
+      // Test basic functionality
+      const text = "Hello World";
+      const rot13 = cypherText(text, 'rot13');
+      const notes = textToNotes(text);
+      
+      console.log('Original:', text);
+      console.log('ROT13:', rot13);
+      console.log('Notes:', notes);
+      
+      if (rot13 && notes && notes.length > 0) {
+        status.innerHTML = `
+          <p style="color: green;">? Modules loaded successfully!</p>
+          <p>Original: ${text}</p>
+          <p>ROT13: ${rot13}</p>
+          <p>Notes: ${notes.join(', ')}</p>
+        `;
+      } else {
+        status.innerHTML = '<p style="color: red;">? Module test failed</p>';
+      }
+    } catch(error) {
+      status.innerHTML = `<p style="color: red;">? Error: ${error.message}</p>`;
+      console.error('Module test error:', error);
+    }
+  </script>
+</body>
+</html>
