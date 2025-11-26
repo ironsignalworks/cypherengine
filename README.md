@@ -1,4 +1,4 @@
-# Chyper Engine
+# Cypher Engine
 
 Experimental text cipher and glitch tool with chaos layers, QR output, and sonic encoding. Built by Iron Signal Works.
 
